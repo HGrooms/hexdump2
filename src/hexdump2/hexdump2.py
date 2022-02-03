@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from os import linesep
 from typing import Union, ByteString, Iterator
 try:
