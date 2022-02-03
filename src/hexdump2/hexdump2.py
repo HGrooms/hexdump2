@@ -63,10 +63,10 @@ def _line_gen(
 
     # Some sequences don't slice nicely (e.g. array.array('I', bytes(16));
     # test if we should convert to bytes
-    if not isinstance(data, (bytes, bytearray)):
-        convert_to_bytes = True
-    else:
+    if isinstance(data, (bytes, bytearray)):
         convert_to_bytes = False
+    else:
+        convert_to_bytes = True
 
     def _lookahead_gen():
         generator = _chunks(data)
@@ -144,7 +144,7 @@ def hexdump(
     offset: int = 0x0,
     collapse: bool = True,
     color: bool = False,
-) -> Union[str, Iterator[str]]:
+) -> Union[None, str, Iterator[str]]:
     """Function that'll create `hexdump -C` of input data.
 
     :param data: bytes-like data to hexdump
@@ -209,8 +209,8 @@ class hd:
         try:
             line = self._result_lines[self._line_pos]
             self._line_pos += 1
-        except IndexError:
+        except IndexError as e:
             # Allows for re-running the generator
             self._line_pos = 0
-            raise StopIteration
+            raise StopIteration from e
         return line

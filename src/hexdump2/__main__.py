@@ -1,32 +1,28 @@
 import argparse
 import sys
-from os import linesep, path, pardir
+from os import linesep
 from pathlib import Path
 
-from hexdump2 import hexdump
+from importlib_metadata import version
 
-# Duplicate code because non-installed running of commandline fails
-# Use double-underscores to hide these from auto-complete imports
-__parent_dir__ = path.abspath(path.join(__file__, pardir))
-with open(path.join(__parent_dir__, "VERSION")) as __version_file__:
-    __version__ = __version_file__.read().strip()
+from hexdump2 import hexdump
 
 
 def setup_arg_parser():
     def _auto_int(value):
         try:
             return int(value, 0)
-        except ValueError:
+        except ValueError as e_auto_int:
             raise argparse.ArgumentTypeError(
                 f"input cannot be converted to int type: {value}"
-            )
+            ) from e_auto_int
 
     parser = argparse.ArgumentParser(
         prog="hexdump",
         description="An imperfect replica of hexdump -C",
     )
     parser.add_argument(
-        "--version", action="version", version=f"%(prog)s {__version__}"
+        "--version", action="version", version=f"%(prog)s {version('hexdump2')}"
     )
     parser.add_argument(
         "-n",
@@ -87,4 +83,4 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        raise SystemError(f"Caught exception in main:{linesep}{e}")
+        raise SystemError(f"Caught exception in main:{linesep}{e}") from e
