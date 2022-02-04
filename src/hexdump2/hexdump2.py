@@ -118,9 +118,6 @@ def _line_gen(
 
             last_line_data = d
 
-        if not yield_star:
-            yield ""
-
     # Create a lookahead generator, this supports finding the last line, which we might need
     # to print the last address
     gen = _lookahead_gen()
@@ -129,13 +126,9 @@ def _line_gen(
         yield last
         last = line
 
-    # The last line; assume that receiver will call a function that will add a line seperator.
-    if collapse and last == "":
-        # If the line ends as being the same before, we print the address at the end
-        yield f"{address_color}{len(data)+offset:08x}"
-    else:
-        # But otherwise we'll just yield the line
-        yield last[:-1]
+    yield last
+    # The last line; assume that receiver is using a function that will add a line seperator.
+    yield f"{address_color}{len(data) + offset:08x}"
 
 
 def hexdump(

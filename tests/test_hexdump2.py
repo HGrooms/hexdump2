@@ -13,7 +13,8 @@ from hexdump2 import hexdump, hd
 from hexdump2.__main__ import main
 
 single_line_result = (
-    f"00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|"
+    f"00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|{linesep}"
+    f"00000010"
 )
 double_line_result = single_line_result + linesep + f"*{linesep}" + f"{0x20:08x}"
 
@@ -46,7 +47,7 @@ class TestHexdump2(unittest.TestCase):
         r = hexdump(data, result="generator")
 
         self.assertTrue(isinstance(r, GeneratorType))
-        self.assertEqual(single_line_result, next(r))
+        self.assertEqual(single_line_result[:-8], next(r))
 
     def test_return_string(self):
         data = bytes(16)
@@ -57,7 +58,8 @@ class TestHexdump2(unittest.TestCase):
         data = bytes(16)
         r = hexdump(data, "return", offset=0x100)
         self.assertEqual(
-            f"00000100  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|",
+            f"00000100  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|{linesep}"
+            f"00000110",
             r,
         )
 
@@ -65,7 +67,8 @@ class TestHexdump2(unittest.TestCase):
         data = bytes(9)
         r = hexdump(data, "return")
         self.assertEqual(
-            f"00000000  00 00 00 00 00 00 00 00  00                       |.........|",
+            f"00000000  00 00 00 00 00 00 00 00  00                       |.........|{linesep}"
+            f"00000009",
             r,
         )
 
@@ -74,7 +77,8 @@ class TestHexdump2(unittest.TestCase):
         r = hexdump(data, "return", offset=(1 << 48) - 1)
         # noinspection SpellCheckingInspection
         self.assertEqual(
-            f"ffffffffffff  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|",
+            f"ffffffffffff  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|{linesep}"
+            f"100000000000f",
             r,
         )
 
@@ -83,7 +87,8 @@ class TestHexdump2(unittest.TestCase):
         r = hexdump(data, "return", collapse=False)
         self.assertEqual(
             f"00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|{linesep}"
-            + f"00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|",
+            f"00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|{linesep}"
+            f"00000020",
             r,
         )
 
@@ -150,7 +155,8 @@ class TestHexdump2(unittest.TestCase):
 [32m000000c0[39m  [36mc0 [36mc1 [36mc2 [36mc3 [36mc4 [36mc5 [36mc6 [36mc7  [36mc8 [36mc9 [36mca [36mcb [36mcc [36mcd [36mce [36mcf  [39m|[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[39m|
 [32m000000d0[39m  [36md0 [36md1 [36md2 [36md3 [36md4 [36md5 [36md6 [36md7  [36md8 [36md9 [36mda [36mdb [36mdc [36mdd [36mde [36mdf  [39m|[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[39m|
 [32m000000e0[39m  [36me0 [36me1 [36me2 [36me3 [36me4 [36me5 [36me6 [36me7  [36me8 [36me9 [36mea [36meb [36mec [36med [36mee [36mef  [39m|[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[39m|
-[32m000000f0[39m  [36mf0 [36mf1 [36mf2 [36mf3 [36mf4 [36mf5 [36mf6 [36mf7  [36mf8 [36mf9 [36mfa [36mfb [36mfc [36mfd [36mfe [36mff  [39m|[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[39m|""",
+[32m000000f0[39m  [36mf0 [36mf1 [36mf2 [36mf3 [36mf4 [36mf5 [36mf6 [36mf7  [36mf8 [36mf9 [36mfa [36mfb [36mfc [36mfd [36mfe [36mff  [39m|[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[39m|
+[32m00000100""",
             r,
         )
 
