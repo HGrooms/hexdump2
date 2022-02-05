@@ -21,14 +21,6 @@ def color_always(enable: bool = True):
     COLOR_ALWAYS = enable
 
 
-def _chunks(seq: Union[ByteString, range], size: int = 16) -> ByteString:
-    d, m = divmod(len(seq), size)
-    for i in range(d):
-        yield seq[i * size: (i + 1) * size]
-    if m:
-        yield seq[d * size:]
-
-
 def _line_gen(
     data: ByteString, offset: int = 0x0, collapse: bool = True, color: bool = False
 ) -> Iterator[str]:
@@ -82,12 +74,12 @@ def _line_gen(
         convert_to_bytes = True
 
     def _lookahead_gen():
-        generator = _chunks(data)
         last_line_data = None
         yield_star = True
 
-        for i, d in enumerate(generator):
-            if collapse and d == last_line_data:
+        for i in range(0, len(data), 16):
+            line_data = data[i:i+16]
+            if collapse and line_data == last_line_data:
                 # Only show the star once
                 if yield_star:
                     yield_star = False
@@ -97,19 +89,19 @@ def _line_gen(
                     continue
             else:
                 if convert_to_bytes:
-                    d = bytes(d)
+                    line_data = bytes(line_data)
 
                 # address
-                address_value = (i * 16) + offset
+                address_value = i + offset
 
                 hex_str = ""
                 ascii_str = ""
-                for j, byte in enumerate(d):
+                for j, byte in enumerate(line_data):
                     if byte == 0:
                         character_color = zero_hex_color
                         ascii_chr = "."
 
-                    elif 0x20 <= byte < 0x7E:
+                    elif 0x20 <= byte <= 0x7E:
                         character_color = printable_color
                         ascii_chr = chr(byte)
 
@@ -125,11 +117,11 @@ def _line_gen(
                         hex_str += f"{character_color}{byte:02x}  "
 
                 yield_star = True
-                yield f"{address_color}{address_value:08x}{reset_color}  " \
+                yield f"{address_color}{address_value:08x}  " \
                       f"{hex_str:<49} " \
                       f"{reset_color}|{ascii_str}{reset_color}|{linesep}"
 
-            last_line_data = d
+            last_line_data = line_data
 
     # Create a lookahead generator, this supports finding the last line, which we might need
     # to print the last address
@@ -141,7 +133,7 @@ def _line_gen(
 
     yield last
     # The last line; assume that receiver is using a function that will add a line seperator.
-    yield f"{address_color}{len(data) + offset:08x}"
+    yield f"{address_color}{len(data) + offset:08x}{reset_color}"
 
 
 def hexdump(
