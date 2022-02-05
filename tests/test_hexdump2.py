@@ -173,7 +173,6 @@ class TestHexdump2(unittest.TestCase):
         r = hexdump(bytes(0x100), color=True, result="return")
         self.assertEqual(colored_0x100_nulls, r)
 
-    @unittest.skip("New feature, not testing at this time")
     def test_color_always_env(self):
         current_env = environ.copy()
 

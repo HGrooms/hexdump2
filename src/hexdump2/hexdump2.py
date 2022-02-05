@@ -1,7 +1,7 @@
 """
 Contains the functionality for creating hexdump lines from input data.
 """
-from os import linesep
+from os import linesep, environ
 from typing import Union, ByteString, Iterator
 try:
     import colorama
@@ -10,7 +10,7 @@ try:
 except ImportError:
     colorama = None
 
-COLOR_ALWAYS = False
+COLOR_ALWAYS = bool(environ.get('HD2_EN_CLR', False))
 
 
 def color_always(enable: bool = True):

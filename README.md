@@ -17,8 +17,6 @@ Import the `hexdump` function from `hexdump2` package and use. By default, `hexd
 
 ```python
 from hexdump2 import hexdump
-# -- or --
-import hexdump2.hexdump2 as hexdump
 
 hexdump(bytes(32))
 """
@@ -38,6 +36,21 @@ Additional functionality by keyword args:
 * `collapse` - turn on/off duplicate lines with `*`. Default: true
 * `color` - turn on/off ANSI color codes (provided by [colorama](https://pypi.org/project/colorama/) package). Default: false
 
+Color can be enabled all the time with:
+
+```python
+from hexdump2 import hexdump, color_always
+color_always()  # Defaults to True
+hexdump(bytes(32))
+"""
+[32m00000000[39m  [39m00 [39m00 [39m00 [39m00 [39m00 [39m00 [39m00 [39m00  [39m00 [39m00 [39m00 [39m00 [39m00 [39m00 [39m00 [39m00  [39m|[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m|
+[31m*
+[32m00000020
+"""
+# Disable
+color_always(False)
+```
+
 ## Command Line
 
 A simple command line is provided by running the python console script `hexdump2` or `hd2`:
@@ -50,6 +63,16 @@ If not installed via pip, the command line can also be run with:
 
 ```commandline
 python3 path/to/hexdump2_package -h 
+```
+
+Color can be enabled all the time for the command line by setting the environmental variable `HD2_EN_CLR` with any value (internally it's a string, which is converted to a bool):
+
+```commandline
+export HD2_EN_CLR="True"
+hd2 0x20_nulls.bin
+[32m00000000[39m  [39m00 [39m00 [39m00 [39m00 [39m00 [39m00 [39m00 [39m00  [39m00 [39m00 [39m00 [39m00 [39m00 [39m00 [39m00 [39m00  [39m|[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m|
+[31m*
+[32m00000020
 ```
 
 ## Usage Examples
