@@ -1,3 +1,6 @@
+"""
+Contains the functionality for creating hexdump lines from input data.
+"""
 from os import linesep
 from typing import Union, ByteString, Iterator
 try:
@@ -6,6 +9,16 @@ try:
     colorama.init(autoreset=True)  # Only needed for Windows
 except ImportError:
     colorama = None
+
+COLOR_ALWAYS = False
+
+
+def color_always(enable: bool = True):
+    """Allows user to set flag to enable always coloring output
+    :param enable: Always enable color
+    """
+    global COLOR_ALWAYS
+    COLOR_ALWAYS = enable
 
 
 def _chunks(seq: Union[ByteString, range], size: int = 16) -> ByteString:
@@ -147,6 +160,9 @@ def hexdump(
     :param color: enable color output; should only be used for outputting to stdout (e.g. `result=print`).
     :return:
     """
+    if COLOR_ALWAYS:
+        color = COLOR_ALWAYS
+
     gen = _line_gen(data, offset, collapse, color)
     if result == "print":
         for line in gen:
