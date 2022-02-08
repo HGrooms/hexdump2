@@ -101,6 +101,7 @@ def _line_gen(
 
                 hex_str = ""
                 ascii_str = ""
+                hex_str_pad = 50  # 3 chr per position + 2 end spacing
                 for j, byte in enumerate(line_data):
                     if byte == 0:
                         character_color = zero_hex_color
@@ -121,9 +122,12 @@ def _line_gen(
                     else:
                         hex_str += f"{character_color}{byte:02x}  "
 
+                    # Account for padding in color mode
+                    hex_str_pad += len(character_color)
+
                 yield_star = True
                 yield f"{address_color}{address_value:08x}  " \
-                      f"{hex_str:<49} " \
+                      f"{hex_str: <{hex_str_pad}}" \
                       f"{reset_color}|{ascii_str}{reset_color}|{linesep}"
 
             last_line_data = line_data

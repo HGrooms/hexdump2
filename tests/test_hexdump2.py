@@ -24,6 +24,13 @@ double_line_result = (
     f"00000020"
 )
 
+nine_range_result = '00000000  00 01 02 03 04 05 06 07  08                       |.........|\n00000009'
+
+nine_range_color_result = r"""[32m00000000  [39m00 [36m01 [36m02 [36m03 [36m04 [36m05 [36m06 [36m07  [36m08                       [39m|[39m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[39m|
+[32m00000009[39m"""
+
+nine_bytes_result = '00000000  00 00 00 00 00 00 00 00  00                       |.........|\n00000009'
+
 range_0x100_result = r"""00000000  00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f  |................|
 00000010  10 11 12 13 14 15 16 17  18 19 1a 1b 1c 1d 1e 1f  |................|
 00000020  20 21 22 23 24 25 26 27  28 29 2a 2b 2c 2d 2e 2f  | !"#$%&'()*+,-./|
@@ -110,13 +117,13 @@ class TestHexdump2(unittest.TestCase):
         )
 
     def test_short_line(self):
-        data = bytes(9)
-        r = hexdump(data, "return")
-        self.assertEqual(
-            f"00000000  00 00 00 00 00 00 00 00  00                       |.........|{linesep}"
-            f"00000009",
-            r,
-        )
+        self.assertEqual(nine_bytes_result, hexdump(bytes(9), "return"))
+
+    def test_short_line_range(self):
+        self.assertEqual(nine_range_result, hexdump(range(9), result='return'))
+
+    def test_short_line_range_color(self):
+        self.assertEqual(nine_range_color_result, hexdump(range(9), color=True, result='return'))
 
     def test_large_address(self):
         data = bytes(16)
