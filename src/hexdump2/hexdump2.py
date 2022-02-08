@@ -89,7 +89,12 @@ def _line_gen(
                     continue
             else:
                 if convert_to_bytes:
-                    line_data = bytes(line_data)
+                    if isinstance(line_data, str):
+                        # Use the `iso-8859-1` or `latin-1` encodings to map 0x00 to 0xff to bytes 0x00 to 0xff.
+                        # c.f. https://docs.python.org/3/library/codecs.html#encodings-and-unicode
+                        line_data = bytes(line_data, encoding='iso-8859-1')
+                    else:
+                        line_data = bytes(line_data)
 
                 # address
                 address_value = i + offset

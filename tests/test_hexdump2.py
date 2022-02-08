@@ -248,6 +248,11 @@ class TestHexdump2(unittest.TestCase):
 
         self.assertIn("len()", cm.exception.args[0])
 
+    def test_string_conversion(self):
+        test_str = ''.join(chr(_) for _ in range(256))
+        r = hexdump(test_str, result='return')
+        self.assertEqual(r, range_0x100_result)
+
 
 class TestClassHD(unittest.TestCase):
     def test_in_string(self):
