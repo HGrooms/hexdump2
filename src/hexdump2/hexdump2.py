@@ -17,7 +17,7 @@ def color_always(enable: bool = True):
     """Allows user to set flag to enable always coloring output
     :param enable: Always enable color
     """
-    global COLOR_ALWAYS
+    global COLOR_ALWAYS  # pylint: disable=global-statement
     COLOR_ALWAYS = enable
 
 
@@ -197,7 +197,7 @@ class hd:
     def __init__(
         self,
         data: ByteString,
-        result: str = None,
+        result: str = None,  # pylint: disable=unused-argument
         offset: int = 0x0,
         collapse: bool = True,
     ):
