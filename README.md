@@ -36,7 +36,7 @@ Additional functionality by keyword args:
 * `collapse` - turn on/off duplicate lines with `*`. Default: true
 * `color` - turn on/off ANSI color codes (provided by [colorama](https://pypi.org/project/colorama/) package). Default: false
 
-Color can be enabled all the time with:
+Color can be en/disabled all the time with by calling `color_always()` in python or by setting the environmental variable `HD2_EN_CLR` before importing.
 
 ```python
 from hexdump2 import hexdump, color_always
