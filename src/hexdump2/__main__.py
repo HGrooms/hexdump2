@@ -45,9 +45,9 @@ def setup_arg_parser():
         action='store_true',
     )
     parser.add_argument(
-        '-a',
-        dest='collapse',
-        help='Do NOT collapse multiple lines with a `*`',
+        '-v',
+        dest='verbose_output',
+        help='Cause Hexdump2 to display all lines; otherwise similar lines are shown with a `*`',
         action='store_false',
     )
     parser.add_argument(
@@ -71,10 +71,10 @@ def main():
                 read_start = args.offset if args.offset is not None else 0
                 length = args.length if args.length is not None else file_size
 
-                hexdump(fh.read(length), offset=read_start, collapse=args.collapse, color=args.color)
+                hexdump(fh.read(length), offset=read_start, collapse=args.verbose_output, color=args.color)
     except KeyboardInterrupt:
-        # Caught interrupt; explicit pass
-        pass
+        # Caught interrupt; print a newline to make sure we're clear.
+        print("")
 
     sys.exit(0)
 
