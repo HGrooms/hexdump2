@@ -2,7 +2,8 @@
 Contains the functionality for creating hexdump lines from input data.
 """
 from os import linesep, environ
-from typing import Union, ByteString, Iterator
+from typing import Union, ByteString, Iterator, Literal
+
 try:
     import colorama
 
@@ -10,7 +11,7 @@ try:
 except ImportError:
     colorama = None
 
-COLOR_ALWAYS = bool(environ.get('HD2_EN_CLR', False))
+COLOR_ALWAYS = bool(environ.get("HD2_EN_CLR", False))
 
 
 def color_always(enable: bool = True):
@@ -92,7 +93,7 @@ def _line_gen(
                     if isinstance(line_data, str):
                         # Use the `iso-8859-1` or `latin-1` encodings to map 0x00 to 0xff to bytes 0x00 to 0xff.
                         # c.f. https://docs.python.org/3/library/codecs.html#encodings-and-unicode
-                        line_data = bytes(line_data, encoding='iso-8859-1')
+                        line_data = bytes(line_data, encoding="iso-8859-1")
                     else:
                         line_data = bytes(line_data)
 
@@ -147,7 +148,7 @@ def _line_gen(
 
 def hexdump(
     data: Union[ByteString, range],
-    result: str = "print",
+    result: Literal["print", "return", "generator"] = "print",
     offset: int = 0x0,
     collapse: bool = True,
     color: bool = False,
