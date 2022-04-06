@@ -19,7 +19,15 @@ def color_always(enable: bool = True):
     :param enable: Always enable color
     """
     global COLOR_ALWAYS  # pylint: disable=global-statement
-    COLOR_ALWAYS = enable
+
+    # Support http://no-color.org/
+    no_color = bool(environ.get("NO_COLOR", False))
+    # Token check for color support
+    dumb_terminal = environ.get("TERM")
+    if no_color or dumb_terminal == "dumb":
+        COLOR_ALWAYS = False
+    else:
+        COLOR_ALWAYS = enable
 
 
 def _line_gen(
