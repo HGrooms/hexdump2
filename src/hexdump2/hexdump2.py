@@ -142,7 +142,17 @@ def _line_gen(
     # Create a lookahead generator, this supports finding the last line, which we might need
     # to print the last address
     gen = _lookahead_gen()
-    last = next(gen)
+    try:
+        last = next(gen)
+    except StopIteration:
+        # Should never get here, as we check for empty data a head of time.  But...
+        if offset:
+            # if we have an offset, show it.
+            yield f"{address_color}{offset:08x}{linesep}"
+
+        # Return; this will cause a StopIteration
+        return
+
     for line in gen:
         yield last
         last = line
@@ -178,6 +188,7 @@ def hexdump(
 
         # Add newline for last item
         print("")
+        return None
 
     elif result == "return":
         return "".join(gen)
@@ -226,8 +237,8 @@ class hd:
         try:
             line = self._result_lines[self._line_pos]
             self._line_pos += 1
-        except IndexError as e:
+        except IndexError as exp_index:
             # Allows for re-running the generator
             self._line_pos = 0
-            raise StopIteration from e
+            raise StopIteration from exp_index
         return line
