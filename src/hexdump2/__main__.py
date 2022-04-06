@@ -39,16 +39,16 @@ def setup_arg_parser():
         required=False,
     )
     parser.add_argument(
-        '-l',
+        "-l",
         dest="color",
         help="Color output",
-        action='store_true',
+        action="store_true",
     )
     parser.add_argument(
-        '-v',
-        dest='verbose_output',
-        help='Cause Hexdump2 to display all lines; otherwise similar lines are shown with a `*`',
-        action='store_false',
+        "-v",
+        dest="verbose_output",
+        help="Cause Hexdump2 to display all lines; otherwise similar lines are shown with a `*`",
+        action="store_false",
     )
     parser.add_argument(
         "file",
@@ -71,7 +71,12 @@ def main():
                 read_start = args.offset if args.offset is not None else 0
                 length = args.length if args.length is not None else file_size
 
-                hexdump(fh.read(length), offset=read_start, collapse=args.verbose_output, color=args.color)
+                hexdump(
+                    fh.read(length),
+                    offset=read_start,
+                    collapse=args.verbose_output,
+                    color=args.color,
+                )
     except KeyboardInterrupt:
         # Caught interrupt; print a newline to make sure we're clear.
         print("")

@@ -79,7 +79,7 @@ def _line_gen(
         yield_star = True
 
         for i in range(0, len(data), 16):
-            line_data = data[i:i+16]
+            line_data = data[i : i + 16]
             if collapse and line_data == last_line_data:
                 # Only show the star once
                 if yield_star:
@@ -127,9 +127,7 @@ def _line_gen(
                     hex_str_pad += len(character_color)
 
                 yield_star = True
-                yield f"{address_color}{address_value:08x}  " \
-                      f"{hex_str: <{hex_str_pad}}" \
-                      f"{reset_color}|{ascii_str}{reset_color}|{linesep}"
+                yield f"{address_color}{address_value:08x}  " f"{hex_str: <{hex_str_pad}}" f"{reset_color}|{ascii_str}{reset_color}|{linesep}"
 
             last_line_data = line_data
 

@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Incorrect link for changelog in setup.cfg metadata
 
+### Changed
+
+Run the black code formatter (https://black.readthedocs.io/en/stable/)
+
 ## [1.1.0] - 2022-02-8
 ### Added
 - This changelog and URL for changelog into setup.cfg

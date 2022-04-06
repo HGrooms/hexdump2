@@ -11,8 +11,9 @@ from os import linesep, environ
 from types import GeneratorType
 from unittest.mock import patch
 
-from hexdump2 import hexdump, hd
 from hexdump2.__main__ import main
+
+from hexdump2 import hexdump, hd
 
 single_line_result = (
     f"00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|{linesep}"
@@ -24,12 +25,16 @@ double_line_result = (
     f"00000020"
 )
 
-nine_range_result = '00000000  00 01 02 03 04 05 06 07  08                       |.........|\n00000009'
+nine_range_result = (
+    "00000000  00 01 02 03 04 05 06 07  08                       |.........|\n00000009"
+)
 
 nine_range_color_result = r"""[32m00000000  [39m00 [36m01 [36m02 [36m03 [36m04 [36m05 [36m06 [36m07  [36m08                       [39m|[39m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[39m|
 [32m00000009[39m"""
 
-nine_bytes_result = '00000000  00 00 00 00 00 00 00 00  00                       |.........|\n00000009'
+nine_bytes_result = (
+    "00000000  00 00 00 00 00 00 00 00  00                       |.........|\n00000009"
+)
 
 range_0x100_result = r"""00000000  00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f  |................|
 00000010  10 11 12 13 14 15 16 17  18 19 1a 1b 1c 1d 1e 1f  |................|
@@ -120,10 +125,12 @@ class TestHexdump2(unittest.TestCase):
         self.assertEqual(nine_bytes_result, hexdump(bytes(9), "return"))
 
     def test_short_line_range(self):
-        self.assertEqual(nine_range_result, hexdump(range(9), result='return'))
+        self.assertEqual(nine_range_result, hexdump(range(9), result="return"))
 
     def test_short_line_range_color(self):
-        self.assertEqual(nine_range_color_result, hexdump(range(9), color=True, result='return'))
+        self.assertEqual(
+            nine_range_color_result, hexdump(range(9), color=True, result="return")
+        )
 
     def test_large_address(self):
         data = bytes(16)
@@ -146,7 +153,7 @@ class TestHexdump2(unittest.TestCase):
         )
 
     def test_multi_line_no_nulls(self):
-        r = hexdump(range(0x100), 'return')
+        r = hexdump(range(0x100), "return")
         self.assertEqual(range_0x100_result, r)
 
     def test_collapse_line(self):
@@ -169,7 +176,7 @@ class TestHexdump2(unittest.TestCase):
             self.assertEqual("", r)
 
     def test_large_data(self):
-        data = bytes(2 ** 25)
+        data = bytes(2**25)
         r = hexdump(data, result="return")
         self.assertEqual(
             f"00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|{linesep}"
@@ -206,10 +213,11 @@ class TestHexdump2(unittest.TestCase):
     def test_color_always_env(self):
         current_env = environ.copy()
 
-        current_env.setdefault('HD2_EN_CLR', 'True')
+        current_env.setdefault("HD2_EN_CLR", "True")
         with patch.object(os, "environ", current_env):
             # Import so we can reload
             import hexdump2.hexdump2
+
             importlib.reload(hexdump2.hexdump2)
 
             r = hexdump2.hexdump2.hexdump(bytes(0x100), result="return")
@@ -256,8 +264,8 @@ class TestHexdump2(unittest.TestCase):
         self.assertIn("len()", cm.exception.args[0])
 
     def test_string_conversion(self):
-        test_str = ''.join(chr(_) for _ in range(256))
-        r = hexdump(test_str, result='return')
+        test_str = "".join(chr(_) for _ in range(256))
+        r = hexdump(test_str, result="return")
         self.assertEqual(r, range_0x100_result)
 
 
