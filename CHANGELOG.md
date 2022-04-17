@@ -5,14 +5,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [1.1.1]
 ### Added
 
 Support for NO_COLOR environmental variable (http://no-color.org/)
 Support for checking of TERM environmental variable as "dumb"
 Type hints for literal values possible to hexdump2 result kwarg.
+Development install dependencies
 
 ### Fixed
 
+Incorrect package importlib_metadata for Python>3.8
 Incorrect link for changelog in setup.cfg metadata
 
 ### Changed
