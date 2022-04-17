@@ -66,8 +66,10 @@ def _line_gen(
     # Empty data begets empty line
     if len(data) == 0:
         if offset:
-            # Manifests when we've read past the end of a file, which results in an empty buffer.
-            # However, the offset we're reading at is still there.  Show the end address in this case.
+            # Manifests when we've read past the end of a file, which results in an empty
+            # buffer.
+            # However, the offset we're reading at is still there.  Show the end address in this
+            # case.
             # e.g., $ hexdump -s 10m 8mib_file.bin
             # 0800000
             yield f"{address_color}{offset:08x}{linesep}"
@@ -99,7 +101,8 @@ def _line_gen(
             else:
                 if convert_to_bytes:
                     if isinstance(line_data, str):
-                        # Use the `iso-8859-1` or `latin-1` encodings to map 0x00 to 0xff to bytes 0x00 to 0xff.
+                        # Use the `iso-8859-1` or `latin-1` encodings to map 0x00 to 0xff to bytes
+                        # 0x00 to 0xff.
                         # c.f. https://docs.python.org/3/library/codecs.html#encodings-and-unicode
                         line_data = bytes(line_data, encoding="iso-8859-1")
                     else:
@@ -175,7 +178,8 @@ def hexdump(
     :param result: type of output/return, must be `print` (default), `return`, `generator`.
     :param offset: value to add to the address line.
     :param collapse: flag to turn on/off collapsing multiple same lines
-    :param color: enable color output; should only be used for outputting to stdout (e.g. `result=print`).
+    :param color: enable color output; should only be used for outputting to stdout
+        (e.g. `result=print`).
     :return:
     """
     if COLOR_ALWAYS:
@@ -190,16 +194,13 @@ def hexdump(
         print("")
         return None
 
-    elif result == "return":
+    if result == "return":
         return "".join(gen)
 
-    elif result == "generator":
+    if result == "generator":
         return gen
 
-    else:
-        raise ValueError(
-            "`result` argument should be `print`, `return`, or `generator`"
-        )
+    raise ValueError("`result` argument should be `print`, `return`, or `generator`")
 
 
 # noinspection PyPep8Naming

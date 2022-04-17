@@ -11,9 +11,8 @@ from os import linesep, environ
 from types import GeneratorType
 from unittest.mock import patch
 
-from hexdump2.__main__ import main
-
 from hexdump2 import hexdump, hd
+from hexdump2.__main__ import main
 
 single_line_result = (
     f"00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|{linesep}"
