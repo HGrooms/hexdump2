@@ -3,7 +3,12 @@ import sys
 from os import linesep
 from pathlib import Path
 
-from importlib_metadata import version
+try:
+    # Python 3.8+ should have this module
+    from importlib.metadata import version
+except ModuleNotFoundError:
+    # For Python 3.6 and 3.7
+    from importlib_metadata import version
 
 from hexdump2 import hexdump
 
