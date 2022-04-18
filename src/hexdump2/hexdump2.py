@@ -1,13 +1,14 @@
 """
 Contains the functionality for creating hexdump lines from input data.
 """
-from os import linesep, environ
-from typing import Union, ByteString, Iterator, Literal
+from os import environ, linesep, name as os_name
+from typing import ByteString, Iterator, Literal, Union
 
 try:
     import colorama
 
-    colorama.init(autoreset=True)  # Only needed for Windows
+    if os_name == "nt":
+        colorama.init(autoreset=True)  # Only needed for Windows
 except ImportError:
     colorama = None
 
