@@ -1,3 +1,6 @@
+"""
+Main function module for hexdump2
+"""
 import argparse
 import sys
 from os import linesep
@@ -13,7 +16,12 @@ except ModuleNotFoundError:
 from hexdump2 import hexdump
 
 
-def setup_arg_parser():
+def _setup_arg_parser():
+    """Creates argument parser for main function.
+
+    :return: argpase arugment parser object
+    """
+
     def _auto_int(value):
         try:
             return int(value, 0)
@@ -66,18 +74,22 @@ def setup_arg_parser():
 
 
 def main():
-    parser = setup_arg_parser()
+    """Main function run by console script hexdump2 or hd2.  Also run by `python -m hexdump2` on
+    command line.
+    :return: system exit return code.
+    """
+    parser = _setup_arg_parser()
     args = parser.parse_args()
 
     try:
         for file in args.file:
-            with file.open("rb") as fh:
+            with file.open("rb") as file_obj:
                 file_size = file.lstat().st_size
                 read_start = args.offset if args.offset is not None else 0
                 length = args.length if args.length is not None else file_size
 
                 hexdump(
-                    fh.read(length),
+                    file_obj.read(length),
                     offset=read_start,
                     collapse=args.verbose_output,
                     color=args.color,

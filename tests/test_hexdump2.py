@@ -7,11 +7,11 @@ import sys
 import tempfile
 import unittest
 from io import StringIO
-from os import linesep, environ
+from os import environ, linesep
 from types import GeneratorType
 from unittest.mock import patch
 
-from hexdump2 import hexdump, hd
+from hexdump2 import hd, hexdump
 from hexdump2.__main__ import main
 
 single_line_result = (
@@ -359,6 +359,21 @@ class TestCommandLineInterface(unittest.TestCase):
                 sys, "argv", test_args
             ), StringIO() as buf, contextlib.redirect_stderr(buf):
                 self._call_main(2)
+
+    def test_no_colorama(self):
+        import colorama
+        import hexdump2.hexdump2
+
+        old_colorama = colorama
+        sys.modules["colorama"] = None
+        importlib.reload(hexdump2.hexdump2)
+
+        data = bytes(range(256))
+        r = hexdump(data, "return", color=True)
+        self.assertNotEqual(colored_ascii_range, r)
+
+        sys.modules["colorama"] = old_colorama
+        importlib.reload(hexdump2.hexdump2)
 
 
 if __name__ == "__main__":

@@ -139,7 +139,7 @@ def _line_gen(
                     hex_str_pad += len(character_color)
 
                 yield_star = True
-                yield f"{address_color}{address_value:08x}  " f"{hex_str: <{hex_str_pad}}" f"{reset_color}|{ascii_str}{reset_color}|{linesep}"
+                yield f"{address_color}{address_value:08x}  {hex_str: <{hex_str_pad}}{reset_color}|{ascii_str}{reset_color}|{linesep}"
 
             last_line_data = line_data
 
