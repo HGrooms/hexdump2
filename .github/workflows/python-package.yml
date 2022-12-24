@@ -29,6 +29,10 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        # This repo uses the src style packaging, which requires installing the package before running tests
+        python -m pip install .
+        # List all that we have installed plus versions
+        python -m pip list
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
