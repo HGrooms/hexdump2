@@ -31,29 +31,32 @@ def color_always(enable: bool = True):
         COLOR_ALWAYS = enable
 
 
-_non_color_map = {
-    **{_: (f"{_:02x}", ".") for _ in range(0x20)},
-    **{_: (f"{_:02x}", chr(_)) for _ in range(0x20, 0x7F)},
-    **{_: (f"{_:02x}", ".") for _ in range(0x7F, 0x100)},
+_non_color_map_ascii = {
+    **{_: "." for _ in range(0x20)},
+    **{_: chr(_) for _ in range(0x20, 0x7F)},
+    **{_: "." for _ in range(0x7F, 0x100)},
+}
+_non_color_map_hex_str = {
+    **{_: f"{_:02x} " for _ in range(0x20)},
+    **{_: f"{_:02x} " for _ in range(0x20, 0x7F)},
+    **{_: f"{_:02x} " for _ in range(0x7F, 0x100)},
 }
 if colorama:
-    _color_map = {
-        **{0: (f"{colorama.Fore.RESET}{0:02x}", colorama.Fore.RESET + ".")},
-        **{
-            _: (f"{ colorama.Fore.CYAN}{_:02x}", colorama.Fore.CYAN + ".")
-            for _ in range(1, 0x20)
-        },
-        **{
-            _: (f"{colorama.Fore.YELLOW}{_:02x}", colorama.Fore.YELLOW + chr(_))
-            for _ in range(0x20, 0x7F)
-        },
-        **{
-            _: (f"{colorama.Fore.CYAN}{_:02x}", colorama.Fore.CYAN + ".")
-            for _ in range(0x7F, 0x100)
-        },
+    _color_map_ascii = {
+        **{0: colorama.Fore.RESET + "."},
+        **{_: colorama.Fore.CYAN + "." for _ in range(1, 0x20)},
+        **{_: colorama.Fore.YELLOW + chr(_) for _ in range(0x20, 0x7F)},
+        **{_: colorama.Fore.CYAN + "." for _ in range(0x7F, 0x100)},
+    }
+    _color_map_hex_str = {
+        **{0: f"{colorama.Fore.RESET}{0:02x} "},
+        **{_: f"{colorama.Fore.CYAN}{_:02x} " for _ in range(1, 0x20)},
+        **{_: f"{colorama.Fore.YELLOW}{_:02x} " for _ in range(0x20, 0x7F)},
+        **{_: f"{colorama.Fore.CYAN}{_:02x} " for _ in range(0x7F, 0x100)},
     }
 else:
-    _color_map = _non_color_map
+    _color_map_ascii = _non_color_map_ascii
+    _color_map_hex_str = _non_color_map_hex_str
 
 
 def _line_gen(
@@ -78,23 +81,21 @@ def _line_gen(
         reset_color = colorama.Fore.RESET
 
         # hex and ascii area
-        char_map = _color_map
-        chr_for_clr = 5  # (3 chr per position + 5 color chr)*16 + 2 end spacing
+        char_map_ascii = _color_map_ascii
+        char_map_hex_str = _color_map_hex_str
 
     else:
         star_line_color = ""
         reset_color = ""
         address_color = ""
-        char_map = _non_color_map
-        chr_for_clr = 0  # 16*3 chr per position + 2 end spacing
+        char_map_ascii = _non_color_map_ascii
+        char_map_hex_str = _non_color_map_hex_str
 
     # Empty data begets empty line
     if len(data) == 0:
         if offset:
-            # Manifests when we've read past the end of a file, which results in an empty
-            # buffer.
-            # However, the offset we're reading at is still there.  Show the end address in this
-            # case.
+            # Manifests when we've read past the end of a file, which results in an empty buffer.
+            # However, the offset we're reading at is still there.  Show the end address in this case.
             # e.g., $ hexdump -s 10m 8mib_file.bin
             # 0800000
             yield f"{address_color}{offset:08x}{linesep}"
@@ -115,8 +116,8 @@ def _line_gen(
 
     last_line_data = None
     yield_star = True
-    for i in range(0, len(data), 16):
-        line_data = data[i : i + 16]
+    for addr in range(0, len(data), 16):
+        line_data = data[addr : addr + 16]
         if collapse and line_data == last_line_data:
             # Only show the star once
             if yield_star:
@@ -126,18 +127,25 @@ def _line_gen(
                 # Otherwise, just goto the next data
                 continue
         else:
-            address_value = i + offset
-            hex_str = (
-                " ".join(char_map[_][0] for _ in line_data[:8])
-                + "  "
-                + " ".join(char_map[_][0] for _ in line_data[8:])
+            line_str = "".join(
+                (
+                    address_color,  # Set address color
+                    f"{addr + offset:08x}  ",  # Form address string
+                    *(char_map_hex_str[_] for _ in line_data[:8]),  # First 8 octets
+                    " ",  # Space between first and second set of octets
+                    *(char_map_hex_str[_] for _ in line_data[8:]),  # Second 8 octets
+                    " " * (49 - (len(line_data) * 3)),  # Padding
+                    reset_color,  # Reset for bars
+                    "|",
+                    *(char_map_ascii[_] for _ in line_data),  # ASCII area
+                    reset_color,  # Reset for bars
+                    "|",
+                    linesep,  # End of line
+                )
             )
-            ascii_str = "".join(char_map[_][1] for _ in line_data)
 
-            # (3 chr per octet * 16) + (2 end spacing) + (5 chr for color per octet * num octet)
-            hex_str_pad = 50 + (chr_for_clr * len(line_data))
+            yield line_str
             yield_star = True
-            yield f"{address_color}{address_value:08x}  {hex_str: <{hex_str_pad}}{reset_color}|{ascii_str}{reset_color}|{linesep}"
 
         last_line_data = line_data
 
