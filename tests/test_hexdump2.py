@@ -7,12 +7,13 @@ import sys
 import tempfile
 import unittest
 from io import StringIO
-from os import linesep, environ
+from os import environ, linesep
 from types import GeneratorType
 from unittest.mock import patch
 
-from hexdump2 import hexdump, hd
-from hexdump2.__main__ import main
+import hexdump2.__main__
+
+from hexdump2 import hd, hexdump
 
 single_line_result = (
     f"00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|{linesep}"
@@ -79,7 +80,7 @@ colored_0x100_nulls = r"""[32m00000000  [39m00 [39m00 [39m00 [39m00 [39m00
 class TestHexdump2(unittest.TestCase):
     def test_bad_return(self):
         with self.assertRaises(ValueError):
-            hexdump(bytes(16), "bad_arg")
+            hexdump(bytes(16), "bad_arg")  # noqa
 
     def test_return_print(self):
         data = bytes(16)
@@ -227,7 +228,7 @@ class TestHexdump2(unittest.TestCase):
 
     @unittest.skip("Messes with other tests.")
     def test_enable_color_always(self):
-        from hexdump2.hexdump2 import color_always
+        from hexdump2.hexdump2 import color_always  # noqa
 
         r = hexdump(bytes(0x100), result="return")
         self.assertNotEqual(colored_0x100_nulls, r)
@@ -250,7 +251,7 @@ class TestHexdump2(unittest.TestCase):
         with self.assertRaises(TypeError) as cm:
             hexdump(Item())
 
-        self.assertIn("subscriptable", cm.exception.args[0])
+        self.assertIn("object to bytes", cm.exception.args[0])
 
     # noinspection PyTypeChecker
     def test_object_without_len(self):
@@ -264,7 +265,7 @@ class TestHexdump2(unittest.TestCase):
 
     def test_string_conversion(self):
         test_str = "".join(chr(_) for _ in range(256))
-        r = hexdump(test_str, result="return")
+        r = hexdump(test_str, result="return")  # noqa
         self.assertEqual(r, range_0x100_result)
 
 
@@ -302,7 +303,7 @@ class TestClassHD(unittest.TestCase):
 class TestCommandLineInterface(unittest.TestCase):
     def _call_main(self, expected_return_code: int = 0):
         with self.assertRaises(SystemExit) as cm:
-            main()
+            hexdump2.__main__.main()
         rc = cm.exception
         self.assertEqual(expected_return_code, rc.code)
 
@@ -359,6 +360,21 @@ class TestCommandLineInterface(unittest.TestCase):
                 sys, "argv", test_args
             ), StringIO() as buf, contextlib.redirect_stderr(buf):
                 self._call_main(2)
+
+    def test_no_colorama(self):
+        import colorama
+        import hexdump2.hexdump2
+
+        old_colorama = colorama
+        sys.modules["colorama"] = None  # noqa
+        importlib.reload(hexdump2.hexdump2)
+
+        data = bytes(range(256))
+        r = hexdump(data, "return", color=True)
+        self.assertNotEqual(colored_ascii_range, r)
+
+        sys.modules["colorama"] = old_colorama
+        importlib.reload(hexdump2.hexdump2)
 
 
 if __name__ == "__main__":
