@@ -113,59 +113,34 @@ def _line_gen(
         else:
             data = bytes(data)
 
-    def _lookahead_gen() -> Generator[str, None, None]:
-        """Creates a generator that yields lines of data in the hexdump format.  Allows for checking if the previous
-        line is the same as the current line.  This allows for the `*` lines.
-        """
-        last_line_data = None
-        yield_star = True
-
-        for i in range(0, len(data), 16):
-            line_data = data[i : i + 16]
-            if collapse and line_data == last_line_data:
-                # Only show the star once
-                if yield_star:
-                    yield_star = False
-                    yield f"{star_line_color}*{linesep}"
-                else:
-                    # Otherwise, just goto the next data
-                    continue
+    last_line_data = None
+    yield_star = True
+    for i in range(0, len(data), 16):
+        line_data = data[i : i + 16]
+        if collapse and line_data == last_line_data:
+            # Only show the star once
+            if yield_star:
+                yield_star = False
+                yield f"{star_line_color}*{linesep}"
             else:
-                # address
-                address_value = i + offset
-                hex_str = (
-                    " ".join(char_map[_][0] for _ in line_data[:8])
-                    + "  "
-                    + " ".join(char_map[_][0] for _ in line_data[8:])
-                )
-                ascii_str = "".join(char_map[_][1] for _ in line_data)
+                # Otherwise, just goto the next data
+                continue
+        else:
+            address_value = i + offset
+            hex_str = (
+                " ".join(char_map[_][0] for _ in line_data[:8])
+                + "  "
+                + " ".join(char_map[_][0] for _ in line_data[8:])
+            )
+            ascii_str = "".join(char_map[_][1] for _ in line_data)
 
-                # (3 chr per octet * 16) + (2 end spacing) + (5 chr for color per octet * num octet)
-                hex_str_pad = 50 + (chr_for_clr * len(line_data))
-                yield_star = True
-                yield f"{address_color}{address_value:08x}  {hex_str: <{hex_str_pad}}{reset_color}|{ascii_str}{reset_color}|{linesep}"
+            # (3 chr per octet * 16) + (2 end spacing) + (5 chr for color per octet * num octet)
+            hex_str_pad = 50 + (chr_for_clr * len(line_data))
+            yield_star = True
+            yield f"{address_color}{address_value:08x}  {hex_str: <{hex_str_pad}}{reset_color}|{ascii_str}{reset_color}|{linesep}"
 
-            last_line_data = line_data
+        last_line_data = line_data
 
-    # Create a lookahead generator, this supports finding the last line, which we might need
-    # to print the last address
-    gen = _lookahead_gen()
-    try:
-        last = next(gen)
-    except StopIteration:
-        # Should never get here, as we check for empty data a head of time.  But...
-        if offset:
-            # if we have an offset, show it.
-            yield f"{address_color}{offset:08x}{linesep}"
-
-        # Return; this will cause a StopIteration
-        return
-
-    for line in gen:
-        yield last
-        last = line
-
-    yield last
     # The last line; assume that receiver is using a function that will add a line seperator.
     yield f"{address_color}{len(data) + offset:08x}{reset_color}"
 
