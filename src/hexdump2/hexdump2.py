@@ -2,7 +2,7 @@
 Contains the functionality for creating hexdump lines from input data.
 """
 from os import environ, linesep, name as os_name
-from typing import ByteString, Iterator, Literal, Union
+from typing import ByteString, Generator, Iterator, Literal, Union
 
 try:
     import colorama
@@ -58,7 +58,7 @@ else:
 
 def _line_gen(
     data: ByteString, offset: int = 0x0, collapse: bool = True, color: bool = False
-) -> Iterator[str]:
+) -> Generator[str, None, None]:
     """Generator function that yields a line.
 
     :param data: input data, must be bytes-like
@@ -104,19 +104,19 @@ def _line_gen(
 
     # Some sequences don't slice nicely (e.g. array.array('I', bytes(16));
     # test if we should convert to bytes
-    if isinstance(data, (bytes, bytearray)):
-        convert_to_bytes = False
-        data = memoryview(data)
-    else:
+    if not isinstance(data, (bytes, bytearray)):
         if isinstance(data, str):
             # Use the `iso-8859-1` or `latin-1` encodings to map 0x00 to 0xff to bytes
             # 0x00 to 0xff.
             # c.f. https://docs.python.org/3/library/codecs.html#encodings-and-unicode
             data = memoryview(bytes(data, encoding="iso-8859-1"))
         else:
-            data = memoryview(bytes(data))
+            data = bytes(data)
 
-    def _lookahead_gen():
+    def _lookahead_gen() -> Generator[str, None, None]:
+        """Creates a generator that yields lines of data in the hexdump format.  Allows for checking if the previous
+        line is the same as the current line.  This allows for the `*` lines.
+        """
         last_line_data = None
         yield_star = True
 
