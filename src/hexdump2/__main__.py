@@ -19,7 +19,7 @@ from hexdump2 import hexdump
 def _setup_arg_parser():
     """Creates argument parser for main function.
 
-    :return: argpase arugment parser object
+    :return: argparse argument parser object
     """
 
     def _auto_int(value):

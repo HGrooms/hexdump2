@@ -31,6 +31,31 @@ def color_always(enable: bool = True):
         COLOR_ALWAYS = enable
 
 
+_non_color_map = {
+    **{_: (f"{_:02x}", ".") for _ in range(0x20)},
+    **{_: (f"{_:02x}", chr(_)) for _ in range(0x20, 0x7F)},
+    **{_: (f"{_:02x}", ".") for _ in range(0x7F, 0x100)},
+}
+if colorama:
+    _color_map = {
+        **{0: (f"{colorama.Fore.RESET}{0:02x}", colorama.Fore.RESET + ".")},
+        **{
+            _: (f"{ colorama.Fore.CYAN}{_:02x}", colorama.Fore.CYAN + ".")
+            for _ in range(1, 0x20)
+        },
+        **{
+            _: (f"{colorama.Fore.YELLOW}{_:02x}", colorama.Fore.YELLOW + chr(_))
+            for _ in range(0x20, 0x7F)
+        },
+        **{
+            _: (f"{colorama.Fore.CYAN}{_:02x}", colorama.Fore.CYAN + ".")
+            for _ in range(0x7F, 0x100)
+        },
+    }
+else:
+    _color_map = _non_color_map
+
+
 def _line_gen(
     data: ByteString, offset: int = 0x0, collapse: bool = True, color: bool = False
 ) -> Iterator[str]:
@@ -46,23 +71,22 @@ def _line_gen(
     if color and colorama:
         # address area
         address_color = colorama.Fore.GREEN
-        # hex and ascii area
-        zero_hex_color = colorama.Fore.RESET
-        printable_color = colorama.Fore.YELLOW
-        non_printable = colorama.Fore.CYAN
         # others
         star_line_color = colorama.Fore.RED
 
         # Cannot be set
         reset_color = colorama.Fore.RESET
 
+        # hex and ascii area
+        char_map = _color_map
+        chr_for_clr = 5  # (3 chr per position + 5 color chr)*16 + 2 end spacing
+
     else:
         star_line_color = ""
-        zero_hex_color = ""
-        printable_color = ""
-        non_printable = ""
         reset_color = ""
         address_color = ""
+        char_map = _non_color_map
+        chr_for_clr = 0  # 16*3 chr per position + 2 end spacing
 
     # Empty data begets empty line
     if len(data) == 0:
@@ -82,8 +106,15 @@ def _line_gen(
     # test if we should convert to bytes
     if isinstance(data, (bytes, bytearray)):
         convert_to_bytes = False
+        data = memoryview(data)
     else:
-        convert_to_bytes = True
+        if isinstance(data, str):
+            # Use the `iso-8859-1` or `latin-1` encodings to map 0x00 to 0xff to bytes
+            # 0x00 to 0xff.
+            # c.f. https://docs.python.org/3/library/codecs.html#encodings-and-unicode
+            data = memoryview(bytes(data, encoding="iso-8859-1"))
+        else:
+            data = memoryview(bytes(data))
 
     def _lookahead_gen():
         last_line_data = None
@@ -100,44 +131,17 @@ def _line_gen(
                     # Otherwise, just goto the next data
                     continue
             else:
-                if convert_to_bytes:
-                    if isinstance(line_data, str):
-                        # Use the `iso-8859-1` or `latin-1` encodings to map 0x00 to 0xff to bytes
-                        # 0x00 to 0xff.
-                        # c.f. https://docs.python.org/3/library/codecs.html#encodings-and-unicode
-                        line_data = bytes(line_data, encoding="iso-8859-1")
-                    else:
-                        line_data = bytes(line_data)
-
                 # address
                 address_value = i + offset
+                hex_str = (
+                    " ".join(char_map[_][0] for _ in line_data[:8])
+                    + "  "
+                    + " ".join(char_map[_][0] for _ in line_data[8:])
+                )
+                ascii_str = "".join(char_map[_][1] for _ in line_data)
 
-                hex_str = ""
-                ascii_str = ""
-                hex_str_pad = 50  # 3 chr per position + 2 end spacing
-                for j, byte in enumerate(line_data):
-                    if byte == 0:
-                        character_color = zero_hex_color
-                        ascii_chr = "."
-
-                    elif 0x20 <= byte <= 0x7E:
-                        character_color = printable_color
-                        ascii_chr = chr(byte)
-
-                    else:
-                        character_color = non_printable
-                        ascii_chr = "."
-
-                    ascii_str += f"{character_color}{ascii_chr}"
-                    # Add double spaces after 8 bytes
-                    if j != 7:
-                        hex_str += f"{character_color}{byte:02x} "
-                    else:
-                        hex_str += f"{character_color}{byte:02x}  "
-
-                    # Account for padding in color mode
-                    hex_str_pad += len(character_color)
-
+                # (3 chr per octet * 16) + (2 end spacing) + (5 chr for color per octet * num octet)
+                hex_str_pad = 50 + (chr_for_clr * len(line_data))
                 yield_star = True
                 yield f"{address_color}{address_value:08x}  {hex_str: <{hex_str_pad}}{reset_color}|{ascii_str}{reset_color}|{linesep}"
 
