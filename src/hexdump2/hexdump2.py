@@ -109,7 +109,7 @@ def _line_gen(
             # Use the `iso-8859-1` or `latin-1` encodings to map 0x00 to 0xff to bytes
             # 0x00 to 0xff.
             # c.f. https://docs.python.org/3/library/codecs.html#encodings-and-unicode
-            data = memoryview(bytes(data, encoding="iso-8859-1"))
+            data = bytes(data, encoding="iso-8859-1")
         else:
             data = bytes(data)
 
