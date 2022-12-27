@@ -58,6 +58,13 @@ else:
     _color_map_ascii = _non_color_map_ascii
     _color_map_hex_str = _non_color_map_hex_str
 
+# Used to do a translation on input bytes to what we want printed.
+_ascii_str_map = (
+    b"................................ !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^"
+    b"_`abcdefghijklmnopqrstuvwxyz{|}~.................................................................."
+    b"..............................................................."
+)
+
 
 def _line_gen(
     data: ByteString, offset: int = 0x0, collapse: bool = True, color: bool = False
@@ -73,7 +80,7 @@ def _line_gen(
     # Set color; colorama will import as None if not installed.
     if color and colorama:
         # address area
-        address_color = colorama.Fore.GREEN
+        addr_color = colorama.Fore.GREEN
         # others
         star_line_color = colorama.Fore.RED
 
@@ -87,7 +94,7 @@ def _line_gen(
     else:
         star_line_color = ""
         reset_color = ""
-        address_color = ""
+        addr_color = ""
         char_map_ascii = _non_color_map_ascii
         char_map_hex_str = _non_color_map_hex_str
 
@@ -98,7 +105,7 @@ def _line_gen(
             # However, the offset we're reading at is still there.  Show the end address in this case.
             # e.g., $ hexdump -s 10m 8mib_file.bin
             # 0800000
-            yield f"{address_color}{offset:08x}{linesep}"
+            yield f"{addr_color}{offset:08x}{linesep}"
 
         # Return; this will cause a StopIteration
         return
@@ -127,30 +134,22 @@ def _line_gen(
                 # Otherwise, just goto the next data
                 continue
         else:
-            line_str = "".join(
-                (
-                    address_color,  # Set address color
-                    f"{addr + offset:08x}  ",  # Form address string
-                    *(char_map_hex_str[_] for _ in line_data[:8]),  # First 8 octets
-                    " ",  # Space between first and second set of octets
-                    *(char_map_hex_str[_] for _ in line_data[8:]),  # Second 8 octets
-                    " " * (49 - (len(line_data) * 3)),  # Padding
-                    reset_color,  # Reset for bars
-                    "|",
-                    *(char_map_ascii[_] for _ in line_data),  # ASCII area
-                    reset_color,  # Reset for bars
-                    "|",
-                    linesep,  # End of line
-                )
-            )
+            if color:
+                # 8 octets * (2 per + 1 space) + 1 spaces at the end = 25, up to 8 octets * (5 color per) = 40
+                first_pad = 25 + min(len(line_data) * 5, 40)
+                second_pad = 25 + min(max(0, len(line_data) - 8) * 5, 40)
+                # Need to decode first as the translate() method for bytes does not allow a one-to-many mapping
+                yield f"{addr_color}{addr + offset:08x}  {line_data[:8].decode(encoding='iso-8859-1').translate(char_map_hex_str): <{first_pad}}{line_data[8:].decode(encoding='iso-8859-1').translate(char_map_hex_str): <{second_pad}}{reset_color}|{line_data.decode(encoding='iso-8859-1').translate(char_map_ascii)}{reset_color}|{linesep}"
+            else:
+                # Provides a modest speed-up vs using .join()
+                yield f"{addr+offset:08x}  {line_data[:8].hex(' '): <25}{line_data[8:].hex(' '): <25}|{line_data.translate(_ascii_str_map).decode('ascii')}|{linesep}"
 
-            yield line_str
             yield_star = True
 
         last_line_data = line_data
 
     # The last line; assume that receiver is using a function that will add a line seperator.
-    yield f"{address_color}{len(data) + offset:08x}{reset_color}"
+    yield f"{addr_color}{len(data) + offset:08x}{reset_color}"
 
 
 def hexdump(
