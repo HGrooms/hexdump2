@@ -11,8 +11,6 @@ from os import environ, linesep
 from types import GeneratorType
 from unittest.mock import patch
 
-import hexdump2.__main__
-
 from hexdump2 import hd, hexdump
 
 single_line_result = (
@@ -33,7 +31,7 @@ nine_range_color_result = r"""[32m00000000  [39m00 [36m01 [36m02 [36m03 [3
 [32m00000009[39m"""
 
 if os.name == "nt":
-    nine_range_color_result = f"{os.linesep}".join(
+    nine_range_color_result = f"{linesep}".join(
         nine_range_color_result.splitlines(False)
     )
 
@@ -81,14 +79,14 @@ colored_ascii_range = r"""[32m00000000  [39m00 [36m01 [36m02 [36m03 [36m04
 [32m00000100[39m"""
 
 if os.name == "nt":
-    colored_ascii_range = f"{os.linesep}".join(colored_ascii_range.splitlines(False))
+    colored_ascii_range = f"{linesep}".join(colored_ascii_range.splitlines(False))
 
 colored_0x100_nulls = r"""[32m00000000  [39m00 [39m00 [39m00 [39m00 [39m00 [39m00 [39m00 [39m00  [39m00 [39m00 [39m00 [39m00 [39m00 [39m00 [39m00 [39m00  [39m|[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m|
 [31m*
 [32m00000100[39m"""
 
 if os.name == "nt":
-    colored_0x100_nulls = f"{os.linesep}".join(colored_0x100_nulls.splitlines(False))
+    colored_0x100_nulls = f"{linesep}".join(colored_0x100_nulls.splitlines(False))
 
 
 class TestHexdump2(unittest.TestCase):
@@ -108,7 +106,7 @@ class TestHexdump2(unittest.TestCase):
         data = bytes(16)
         with StringIO() as buf, contextlib.redirect_stdout(buf):
             hexdump(data)
-            print("Hello")
+            print("Hello", end=linesep)
 
             buf.seek(0)
             r = buf.read()
@@ -298,7 +296,7 @@ class TestClassHD(unittest.TestCase):
         data = bytes(32)
         with StringIO() as buf, contextlib.redirect_stdout(buf):
             for line in hd(data):
-                print(line)
+                print(line, end=linesep)
 
             buf.seek(0)
             r = buf.read()
@@ -306,7 +304,7 @@ class TestClassHD(unittest.TestCase):
 
     def test_print_in_script(self):
         with StringIO() as buf, contextlib.redirect_stdout(buf):
-            print(hd(bytes(32)))
+            print(hd(bytes(32)), end=linesep)
 
             buf.seek(0)
             r = buf.read()
