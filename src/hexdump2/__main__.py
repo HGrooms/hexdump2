@@ -1,6 +1,7 @@
 """
 Main function module for hexdump2
 """
+
 import argparse
 import sys
 from os import linesep
@@ -26,17 +27,13 @@ def _setup_arg_parser():
         try:
             return int(value, 0)
         except ValueError as e_auto_int:
-            raise argparse.ArgumentTypeError(
-                f"input cannot be converted to int type: {value}"
-            ) from e_auto_int
+            raise argparse.ArgumentTypeError(f"input cannot be converted to int type: {value}") from e_auto_int
 
     parser = argparse.ArgumentParser(
         prog="hexdump",
         description="An imperfect replica of hexdump -C",
     )
-    parser.add_argument(
-        "--version", action="version", version=f"%(prog)s {version('hexdump2')}"
-    )
+    parser.add_argument("--version", action="version", version=f"%(prog)s {version('hexdump2')}")
     parser.add_argument(
         "-n",
         dest="length",
