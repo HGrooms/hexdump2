@@ -32,6 +32,11 @@ nine_range_result = (
 nine_range_color_result = r"""[32m00000000  [39m00 [36m01 [36m02 [36m03 [36m04 [36m05 [36m06 [36m07  [36m08                       [39m|[39m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[39m|
 [32m00000009[39m"""
 
+if os.name == "nt":
+    nine_range_color_result = f"{os.linesep}".join(
+        nine_range_color_result.splitlines(False)
+    )
+
 nine_bytes_result = (
     "00000000  00 00 00 00 00 00 00 00  00                       |.........|\n00000009"
 )
@@ -54,6 +59,9 @@ range_0x100_result = r"""00000000  00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e
 000000f0  f0 f1 f2 f3 f4 f5 f6 f7  f8 f9 fa fb fc fd fe ff  |................|
 00000100"""
 
+if os.name == "nt":
+    range_0x100_result = f"{os.linesep}".join(range_0x100_result.splitlines(False))
+
 colored_ascii_range = r"""[32m00000000  [39m00 [36m01 [36m02 [36m03 [36m04 [36m05 [36m06 [36m07  [36m08 [36m09 [36m0a [36m0b [36m0c [36m0d [36m0e [36m0f  [39m|[39m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[39m|
 [32m00000010  [36m10 [36m11 [36m12 [36m13 [36m14 [36m15 [36m16 [36m17  [36m18 [36m19 [36m1a [36m1b [36m1c [36m1d [36m1e [36m1f  [39m|[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[39m|
 [32m00000020  [33m20 [33m21 [33m22 [33m23 [33m24 [33m25 [33m26 [33m27  [33m28 [33m29 [33m2a [33m2b [33m2c [33m2d [33m2e [33m2f  [39m|[33m [33m![33m"[33m#[33m$[33m%[33m&[33m'[33m([33m)[33m*[33m+[33m,[33m-[33m.[33m/[39m|
@@ -72,9 +80,15 @@ colored_ascii_range = r"""[32m00000000  [39m00 [36m01 [36m02 [36m03 [36m04
 [32m000000f0  [36mf0 [36mf1 [36mf2 [36mf3 [36mf4 [36mf5 [36mf6 [36mf7  [36mf8 [36mf9 [36mfa [36mfb [36mfc [36mfd [36mfe [36mff  [39m|[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[39m|
 [32m00000100[39m"""
 
+if os.name == "nt":
+    colored_ascii_range = f"{os.linesep}".join(colored_ascii_range.splitlines(False))
+
 colored_0x100_nulls = r"""[32m00000000  [39m00 [39m00 [39m00 [39m00 [39m00 [39m00 [39m00 [39m00  [39m00 [39m00 [39m00 [39m00 [39m00 [39m00 [39m00 [39m00  [39m|[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m.[39m|
 [31m*
 [32m00000100[39m"""
+
+if os.name == "nt":
+    colored_0x100_nulls = f"{os.linesep}".join(colored_0x100_nulls.splitlines(False))
 
 
 class TestHexdump2(unittest.TestCase):
