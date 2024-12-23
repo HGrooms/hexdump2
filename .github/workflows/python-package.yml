@@ -59,7 +59,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install pytest ruff
+          python -m pip install pytest pylint
 
           # This repo uses the src style packaging, which requires installing the package before running tests
           python -m pip install .
@@ -67,9 +67,9 @@ jobs:
           # List all that we have installed plus versions
           python -m pip list
 
-      - name: Lint with ruff
+      - name: Lint with pylint
         run: |
-          ruff check src
+          pylint src --disable=C0301,C0103,R0912
       - name: Test with pytest
         run: |
           pytest
@@ -80,7 +80,7 @@ jobs:
       matrix:
         python-version: [ "3.6", "3.7" ]
 
-    runs-on: macos-12
+    runs-on: macos-13
 
     steps:
       - uses: actions/checkout@v4
@@ -91,7 +91,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install pytest ruff
+          python -m pip install pytest pylint
 
           # This repo uses the src style packaging, which requires installing the package before running tests
           python -m pip install .
@@ -99,9 +99,9 @@ jobs:
           # List all that we have installed plus versions
           python -m pip list
 
-      - name: Lint with ruff
+      - name: Lint with pylint
         run: |
-          ruff check src
+          pylint src --disable=C0301,C0103,R0912
       - name: Test with pytest
         run: |
           pytest
