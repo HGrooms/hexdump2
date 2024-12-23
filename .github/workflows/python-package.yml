@@ -5,21 +5,19 @@ name: Python package
 
 on:
   push:
-    branches: [ "master" ]
   pull_request:
-    branches: [ "master" ]
 
 jobs:
-  build: 
+  build-latest:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
-        os: [ubuntu-latest, macos-latest]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         
     runs-on: ${{ matrix.os }}
 
-    steps:
+    steps: &build-steps
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
@@ -42,3 +40,26 @@ jobs:
     - name: Test with pytest
       run: |
         pytest
+
+
+  build-old-linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ "3.6", "3.7"]
+
+    runs-on: ubuntu-20.04
+
+    steps:
+      <<: *build-steps
+
+  build-old-macos:
+    strategy:
+      fail-fast: true
+      maxtrix:
+        python-version: [ "3.6", "3.7" ]
+
+    runs-on: macos-12
+
+    steps:
+      <<: *build-steps
