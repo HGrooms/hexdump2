@@ -77,7 +77,7 @@ jobs:
   build-old-macos:
     strategy:
       fail-fast: true
-      maxtrix:
+      matrix:
         python-version: [ "3.6", "3.7" ]
 
     runs-on: macos-12
