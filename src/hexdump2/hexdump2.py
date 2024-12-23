@@ -2,7 +2,7 @@
 Contains the functionality for creating hexdump lines from input data.
 """
 from os import environ, linesep, name as os_name
-from typing import ByteString, Generator, Iterator, Literal, Union
+from typing import ByteString, Generator, Iterator, Union
 
 try:
     import colorama
@@ -154,7 +154,7 @@ def _line_gen(
 
 def hexdump(
     data: Union[ByteString, range],
-    result: Literal["print", "return", "generator"] = "print",
+    result="print",
     offset: int = 0x0,
     collapse: bool = True,
     color: bool = False,
