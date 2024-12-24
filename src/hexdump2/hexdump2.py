@@ -179,7 +179,7 @@ def hexdump(
             print(line, end="")
 
         # Add newline for last item
-        print("")
+        print("", end=linesep)
         return None
 
     if result == "return":
