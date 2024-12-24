@@ -12,34 +12,24 @@ from types import GeneratorType
 from unittest.mock import patch
 
 import hexdump2.__main__
-
 from hexdump2 import hd, hexdump
 
 single_line_result = (
-    f"00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|{linesep}"
-    f"00000010"
+    f"00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|{linesep}" f"00000010"
 )
 double_line_result = (
-    f"00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|{linesep}"
-    f"*{linesep}"
-    f"00000020"
+    f"00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|{linesep}" f"*{linesep}" f"00000020"
 )
 
-nine_range_result = (
-    "00000000  00 01 02 03 04 05 06 07  08                       |.........|\n00000009"
-)
+nine_range_result = f"00000000  00 01 02 03 04 05 06 07  08                       |.........|{linesep}00000009"
 
 nine_range_color_result = r"""[32m00000000  [39m00 [36m01 [36m02 [36m03 [36m04 [36m05 [36m06 [36m07  [36m08                       [39m|[39m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[36m.[39m|
 [32m00000009[39m"""
 
 if os.name == "nt":
-    nine_range_color_result = f"{linesep}".join(
-        nine_range_color_result.splitlines(False)
-    )
+    nine_range_color_result = f"{linesep}".join(nine_range_color_result.splitlines(False))
 
-nine_bytes_result = (
-    "00000000  00 00 00 00 00 00 00 00  00                       |.........|\n00000009"
-)
+nine_bytes_result = f"00000000  00 00 00 00 00 00 00 00  00                       |.........|{linesep}00000009"
 
 range_0x100_result = r"""00000000  00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f  |................|
 00000010  10 11 12 13 14 15 16 17  18 19 1a 1b 1c 1d 1e 1f  |................|
@@ -130,8 +120,7 @@ class TestHexdump2(unittest.TestCase):
         data = bytes(16)
         r = hexdump(data, "return", offset=0x100)
         self.assertEqual(
-            f"00000100  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|{linesep}"
-            f"00000110",
+            f"00000100  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|{linesep}" f"00000110",
             r,
         )
 
@@ -142,9 +131,7 @@ class TestHexdump2(unittest.TestCase):
         self.assertEqual(nine_range_result, hexdump(range(9), result="return"))
 
     def test_short_line_range_color(self):
-        self.assertEqual(
-            nine_range_color_result, hexdump(range(9), color=True, result="return")
-        )
+        self.assertEqual(nine_range_color_result, hexdump(range(9), color=True, result="return"))
 
     def test_large_address(self):
         data = bytes(16)
@@ -174,8 +161,7 @@ class TestHexdump2(unittest.TestCase):
         data = bytes(0x400)
         r = hexdump(data, result="return", collapse=True)
         self.assertEqual(
-            f"00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|{linesep}"
-            + f"*{linesep}"
+            f"00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|{linesep}" + f"*{linesep}"
             f"{len(data):08x}",
             r,
         )
@@ -193,8 +179,7 @@ class TestHexdump2(unittest.TestCase):
         data = bytes(2**25)
         r = hexdump(data, result="return")
         self.assertEqual(
-            f"00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|{linesep}"
-            + f"*{linesep}"
+            f"00000000  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|{linesep}" + f"*{linesep}"
             f"{len(data):08x}",
             r,
         )
@@ -329,21 +314,21 @@ class TestCommandLineInterface(unittest.TestCase):
             r = buf.read()
             self.assertIn("usage: hexdump [-h]", r)
 
+    @unittest.skipIf(os.name == "nt", "Doesn't work on Windows runners")
     def test_one_file(self):
         with tempfile.NamedTemporaryFile() as fh:
             fh.write(bytes(16))
             fh.seek(0)
 
             test_args = ["hexdump", fh.name]
-            with patch.object(
-                sys, "argv", test_args
-            ), StringIO() as buf, contextlib.redirect_stdout(buf):
+            with patch.object(sys, "argv", test_args), StringIO() as buf, contextlib.redirect_stdout(buf):
                 self._call_main()
 
                 buf.seek(0)
                 r = buf.read()
                 self.assertEqual(single_line_result + linesep, r)
 
+    @unittest.skipIf(os.name == "nt", "Doesn't work on Windows runners")
     def test_multiple_files(self):
         num_test_files = 3
         files = [tempfile.NamedTemporaryFile() for _ in range(num_test_files)]
@@ -352,9 +337,7 @@ class TestCommandLineInterface(unittest.TestCase):
             fp.seek(0)
 
         test_args = ["hexdump"] + [_.name for _ in files]
-        with patch.object(
-            sys, "argv", test_args
-        ), StringIO() as buf, contextlib.redirect_stdout(buf):
+        with patch.object(sys, "argv", test_args), StringIO() as buf, contextlib.redirect_stdout(buf):
             self._call_main()
 
             buf.seek(0)
@@ -370,9 +353,7 @@ class TestCommandLineInterface(unittest.TestCase):
             fh.seek(0)
 
             test_args = ["hexdump", fh.name, "-n", "abc"]
-            with patch.object(
-                sys, "argv", test_args
-            ), StringIO() as buf, contextlib.redirect_stderr(buf):
+            with patch.object(sys, "argv", test_args), StringIO() as buf, contextlib.redirect_stderr(buf):
                 self._call_main(2)
 
     def test_no_colorama(self):
