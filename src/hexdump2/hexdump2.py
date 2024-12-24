@@ -1,6 +1,7 @@
 """
 Contains the functionality for creating hexdump lines from input data.
 """
+
 from os import environ, linesep, name as os_name
 from typing import ByteString, Generator, Iterator, Literal, Union
 
@@ -178,7 +179,7 @@ def hexdump(
             print(line, end="")
 
         # Add newline for last item
-        print("")
+        print("", end=linesep)
         return None
 
     if result == "return":
